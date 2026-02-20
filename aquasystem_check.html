@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AQUASYSTEM ライフスタイル適合度チェック</title>
+<style>
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f4f7f6; color: #333; padding: 20px; line-height: 1.6; }
+  .container { max-width: 700px; margin: 0 auto; background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
+  h1 { text-align: center; color: #0b3d91; font-size: 26px; margin-bottom: 10px; }
+  p.desc { text-align: center; font-size: 15px; color: #666; margin-bottom: 30px; }
+  .section-title { background-color: #e6f2ff; color: #0b3d91; padding: 10px 15px; border-left: 5px solid #0b3d91; font-weight: bold; margin-bottom: 20px; border-radius: 0 4px 4px 0; }
+  .question { margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px dashed #ddd; }
+  .question p { font-weight: bold; margin-bottom: 12px; font-size: 16px; color: #222; }
+  label { display: block; margin-bottom: 10px; cursor: pointer; background: #fafafa; padding: 12px; border-radius: 6px; border: 1px solid #eee; transition: all 0.2s ease; }
+  label:hover { background: #f0f8ff; border-color: #b3d7ff; transform: translateY(-1px); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+  input[type="radio"] { margin-right: 12px; transform: scale(1.2); cursor: pointer; }
+  button.submit-btn { display: block; width: 100%; padding: 18px; background: linear-gradient(135deg, #0b3d91 0%, #1a5bb8 100%); color: white; border: none; border-radius: 8px; font-size: 20px; font-weight: bold; cursor: pointer; transition: all 0.3s; margin-top: 30px; box-shadow: 0 4px 10px rgba(11, 61, 145, 0.3); }
+  button.submit-btn:hover { background: linear-gradient(135deg, #082d6b 0%, #0b3d91 100%); transform: translateY(-2px); box-shadow: 0 6px 15px rgba(11, 61, 145, 0.4); }
+  
+  /* 結果画面の装飾 */
+  #result { margin-top: 40px; border-radius: 12px; display: none; overflow: hidden; animation: fadeIn 0.8s ease-out; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  .result-header { text-align: center; padding: 30px 20px; color: white; }
+  .result-badge { display: inline-block; background: #ffd700; color: #b32400; font-weight: bold; padding: 5px 15px; border-radius: 20px; font-size: 14px; margin-bottom: 10px; letter-spacing: 1px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+  .result-header h2 { font-size: 32px; margin: 0 0 15px 0; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); }
+  .result-header p { font-size: 16px; margin: 0; font-weight: bold; }
+  
+  .advice-box { background: #fff; padding: 30px; }
+  .advice-title { font-weight: bold; color: #0b3d91; font-size: 20px; text-align: center; margin-bottom: 20px; }
+  ul.custom-advice { padding: 0; margin: 0; list-style: none; }
+  ul.custom-advice li { margin-bottom: 15px; background: #f9fbff; padding: 15px; border-left: 4px solid #0b3d91; border-radius: 0 6px 6px 0; font-size: 15px; line-height: 1.5; }
+  ul.custom-advice li strong { color: #d93800; display: block; margin-bottom: 5px; font-size: 16px; }
+
+  /* CTAエリア（購入ボタン） */
+  .cta-area { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 2px dashed #eee; }
+  .cta-area h3 { color: #333; font-size: 18px; margin-bottom: 15px; }
+  .btn-group { display: flex; flex-direction: column; gap: 15px; }
+  .cta-btn { display: block; width: 100%; padding: 16px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 18px; text-align: center; transition: all 0.3s; box-shadow: 0 3px 6px rgba(0,0,0,0.15); }
+  .cta-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 10px rgba(0,0,0,0.2); }
+  .btn-amazon { background-color: #FF9900; color: #111; }
+  .btn-rakuten { background-color: #BF0000; color: #FFF; }
+  
+  /* ランク別のカラースキーム */
+  .high .result-header { background: linear-gradient(135deg, #d93800 0%, #ff5c26 100%); }
+  .medium .result-header { background: linear-gradient(135deg, #0b3d91 0%, #2b70d1 100%); }
+  .low .result-header { background: linear-gradient(135deg, #666 0%, #999 100%); }
+  .low .result-badge { background: #eee; color: #333; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>AQUASYSTEM<br>ライフスタイル適合度チェック</h1>
+  <p class="desc">7つの質問から、あなたの生活環境や水へのこだわりにAQUASYSTEMがどれだけ適しているかを詳細に分析します。</p>
+
+  <form id="quizForm">
+    <div class="section-title">1. 住環境とインフラについて</div>
+    <div class="question">
+      <p>Q1. 現在のお住まいの建物状況に最も近いものは？</p>
+      <label><input type="radio" name="q1" value="3"> 築年数が経過したマンション・アパート（貯水槽の汚れや配管のサビが心配）</label>
+      <label><input type="radio" name="q1" value="2"> 新築・築浅のマンション・アパート（とりあえず水質は安心できそう）</label>
+      <label><input type="radio" name="q1" value="2"> 一戸建て（水道管から直接水が来ている）</label>
+      <label><input type="radio" name="q1" value="1"> 井戸水や、非常に水質が良いとされる地域の住居</label>
+    </div>
+
+    <div class="question" id="q_disaster">
+      <p>Q2. 台風や地震などによる「停電・断水リスク」への備えについてどうお考えですか？</p>
+      <label><input type="radio" name="q2" value="4"> 過去に経験がある、または非常に不安なので、電気不要で水を確保できる手段が絶対に欲しい</label>
+      <label><input type="radio" name="q2" value="2"> 少し不安。ウォーターサーバー等はあるが、停電時に使えるか分からない</label>
+      <label><input type="radio" name="q2" value="0"> 特に備えはしていない・不安はない</label>
+    </div>
+
+    <div class="section-title">2. 水質・味へのこだわりについて</div>
+    <div class="question">
+      <p>Q3. 現在、水道水の「カルキ臭（塩素）」や「カビ臭さ」を感じることはありますか？</p>
+      <label><input type="radio" name="q3" value="3"> よく感じる。そのまま飲むのは抵抗がある</label>
+      <label><input type="radio" name="q3" value="1"> たまに感じるが、我慢できるレベル</label>
+      <label><input type="radio" name="q3" value="0"> まったく感じない</label>
+    </div>
+
+    <div class="question" id="q_mineral">
+      <p>Q4. 毎日の水に、健康や美容に良いとされる「バナジウム」や「シリカ」などのミネラル成分が含まれていると嬉しいですか？</p>
+      <label><input type="radio" name="q4" value="4"> 非常に嬉しい。サプリやミネラルウォーターを買わずに手軽に摂取したい</label>
+      <label><input type="radio" name="q4" value="2"> できれば含まれていると嬉しい</label>
+      <label><input type="radio" name="q4" value="0"> 水分補給さえできれば、成分にはこだわらない</label>
+    </div>
+
+    <div class="section-title">3. 利便性と衛生面について</div>
+    <div class="question">
+      <p>Q5. 飲み水だけでなく、お米研ぎや料理、お茶やコーヒーにも、浄水された美味しい水をたっぷり使いたいですか？</p>
+      <label><input type="radio" name="q5" value="3"> たっぷり使いたい（ペットボトルだとコストが気になる）</label>
+      <label><input type="radio" name="q5" value="1"> 飲み水専用で十分</label>
+    </div>
+
+    <div class="question" id="q_hygiene">
+      <p>Q6. 浄水器の「内部の衛生面（雑菌の繁殖など）」についてどう感じますか？</p>
+      <label><input type="radio" name="q6" value="4"> 非常に気になる。内部がブラックボックスになっていないか、自分でしっかり洗える構造が良い</label>
+      <label><input type="radio" name="q6" value="2"> 少し気になる。できれば信頼できる機関の認証や基準をクリアしたものが良い</label>
+      <label><input type="radio" name="q6" value="0"> フィルターさえ定期交換すれば気にしない</label>
+    </div>
+
+    <div class="question">
+      <p>Q7. 現在、ペットボトル水を購入したり、空きボトルを捨てたりする手間をどう感じていますか？</p>
+      <label><input type="radio" name="q7" value="3"> 買うのも運ぶのも捨てるのも、非常に面倒でコストもかかる</label>
+      <label><input type="radio" name="q7" value="1"> たまに面倒に感じる</label>
+      <label><input type="radio" name="q7" value="0"> 特に苦にならない（またはペットボトルを買っていない）</label>
+    </div>
+
+    <button type="button" class="submit-btn" onclick="calculateScore()">診断結果とおすすめの解決策を見る</button>
+  </form>
+
+  <div id="result"></div>
+</div>
+
+<script>
+function calculateScore() {
+  let score = 0;
+  let answeredAll = true;
+  let disasterScore = 0;
+  let mineralScore = 0;
+  let hygieneScore = 0;
+  
+  for (let i = 1; i <= 7; i++) {
+    let radios = document.getElementsByName('q' + i);
+    let answered = false;
+    for (let j = 0; j < radios.length; j++) {
+      if (radios[j].checked) {
+        let val = parseInt(radios[j].value);
+        score += val;
+        if (i === 2) disasterScore = val;
+        if (i === 4) mineralScore = val;
+        if (i === 6) hygieneScore = val;
+        answered = true;
+        break;
+      }
+    }
+    if (!answered) answeredAll = false;
+  }
+
+  if (!answeredAll) {
+    alert('精度の高い診断を行うため、すべての質問にお答えください。');
+    return;
+  }
+
+  let resultDiv = document.getElementById('result');
+  resultDiv.style.display = 'block';
+  resultDiv.className = ''; 
+
+  let adviceHTML = "<ul class='custom-advice'>";
+  if (disasterScore >= 2) {
+    adviceHTML += "<li><strong>💡 停電・断水時でも安心の「電源不要」設計</strong> AQUASYSTEMは重力ろ過式のため電気を一切使いません。いざという災害時でも、お風呂の残り湯や雨水を生活用水として浄化する頼もしい備えになります。</li>";
+  }
+  if (mineralScore >= 2) {
+    adviceHTML += "<li><strong>✨ 毎日飲むだけで「バナジウム＆シリカ」を補給</strong> ただの浄水ではありません。専用フィルターを通すことで、美容と健康で注目のミネラル成分をプラス。自宅の水道水が、高級ミネラルウォーターに生まれ変わります。</li>";
+  }
+  if (hygieneScore >= 2) {
+    adviceHTML += "<li><strong>🛡️ 自分で洗えてずっと清潔。確かな浄水性能</strong> タンク式だからこそ、隅々まで丸洗いが可能。内部がブラックボックスにならず、常に衛生的な状態を保てます。</li>";
+  }
+  if (adviceHTML === "<ul class='custom-advice'>") {
+     adviceHTML += "<li><strong>💰 ペットボトルの「買う・捨てる」ストレスをゼロに</strong> 重い水を運ぶ手間も、面倒なゴミ捨てもなくなります。お米研ぎやお料理にも、美味しい浄水を惜しみなくたっぷり使えます。</li>";
+  }
+  adviceHTML += "</ul>";
+
+  let headerHTML = "";
+  if (score >= 18) {
+    resultDiv.classList.add('high');
+    headerHTML = "<div class='result-header'><span class='result-badge'>Sランク：もはや必須レベル！</span><h2>適合度：98％</h2><p>AQUASYSTEMは、あなたの生活の悩みを劇的に解決するベストパートナーです。今すぐの導入を強くおすすめします。</p></div>";
+  } else if (score >= 10) {
+    resultDiv.classList.add('medium');
+    headerHTML = "<div class='result-header'><span class='result-badge'>Aランク：ぴったりです！</span><h2>適合度：75％</h2><p>AQUASYSTEMを取り入れることで、毎日の水回りのストレスが減り、生活の質（QOL）が大きく向上します。</p></div>";
+  } else {
+    resultDiv.classList.add('low');
+    headerHTML = "<div class='result-header'><span class='result-badge'>Bランク：検討の価値あり</span><h2>適合度：40％</h2><p>現状でも問題ないかもしれませんが、より安心で豊かな生活のために、以下のメリットをチェックしてみてください。</p></div>";
+  }
+
+  // CTA（購入ボタン）エリアの生成
+  // ※ href=の後の「#」を、実際のAmazonや楽天の商品ページURLに変更してください。
+  let ctaHTML = `
+    <div class='cta-area'>
+      <h3>＼ 早速、あなたの新しい水生活を始めましょう ／</h3>
+      <div class='btn-group'>
+        <a href="https://www.amazon.co.jp/dp/B0CKXN6PF9" target="_blank" class='cta-btn btn-amazon'>Amazonで詳細を見る</a>
+        <a href="#" target="_blank" class='cta-btn btn-rakuten'>楽天市場で詳細を見る</a>
+      </div>
+    </div>
+  `;
+
+  resultDiv.innerHTML = headerHTML + "<div class='advice-box'><div class='advice-title'>AQUASYSTEMがあなたに提供できる価値</div>" + adviceHTML + ctaHTML + "</div>";
+  
+  // 結果が表示されたら、そこまで画面をスムーズにスクロールさせる
+  resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
+
+</body>
+</html>
